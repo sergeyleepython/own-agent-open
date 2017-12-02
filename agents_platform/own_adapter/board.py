@@ -69,8 +69,12 @@ class Board:
         for element in dictionary['elements']:
             href = element['_links'][0]['href']
             name = element['caption']
+            sizeX = element['sizeX']
+            sizeY = element['sizeY']
+            posX = element['posX']
+            posY = element['posY']
             if re.match(regexp, name):
-                element = Element(self.__platform_access, name, href, self)
+                element = Element(self.__platform_access, name, href, self, sizeX, sizeY, posX, posY)
                 elements.append(element)
         return elements
 
@@ -178,6 +182,9 @@ class Board:
                              'Error: add element to {} failed. Error type: {}'.format(self.get_name(), str(e)))
             return e.code
         # add element name (creation of the message on the board chat)
+        self.update_element(pos_x, pos_y, new_element_link, size_x, size_y, caption, )
+
+    def update_element(self, pos_x, pos_y, new_element_link, size_x=1, size_y=1, caption=''):
         try:
             http_method = 'PUT'
             detail = 'element'

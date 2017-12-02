@@ -12,19 +12,41 @@ from own_adapter.file import File
 class Element:
     __name = ''
     __url = ''
+    __posX = 0
+    __posY = 0
+    __sizeX = 0
+    __sizeY = 0
     __board = None
     __last_processing_time = None
+    __id = ''
 
-    def __init__(self, platform_access, name='', identifier='', board=None, last_processing_time=datetime.strptime('2000.01.01 00:00:00', '%Y.%m.%d %H:%M:%S')):
+    def __init__(self, platform_access, name='', identifier='', board=None, sizeX=2, sizeY=2, posX=1, posY=1, link='',
+                 last_processing_time=datetime.strptime('2000.01.01 00:00:00', '%Y.%m.%d %H:%M:%S')):
         self.__platform_access = platform_access
         self.__name = name
         self.__url = platform_access.get_platform_url() + identifier
         self.__id = identifier
         self.__board = board
         self.__last_processing_time = last_processing_time
+        self.__sizeX = sizeX
+        self.__sizeY = sizeY
+        self.__posX = posX
+        self.__posY = posY
 
     def get_url(self):
         return self.__url
+
+    def get_posX(self):
+        return self.__posX
+
+    def get_posY(self):
+        return self.__posY
+
+    def get_sizeX(self):
+        return self.__sizeX
+
+    def get_sizeY(self):
+        return self.__sizeY
 
     def get_name(self):
         return self.__name
@@ -39,7 +61,7 @@ class Element:
         return self.__last_processing_time
 
     def set_last_processing_time(self, last_processing_time):
-        assert(isinstance(last_processing_time, datetime))
+        assert (isinstance(last_processing_time, datetime))
         self.__last_processing_time = last_processing_time
 
     def to_dictionary(self):
@@ -161,11 +183,13 @@ class Element:
             return response_status
         except urllib.error.HTTPError as e:
             logger.exception('own_adapter',
-                             'Error: put file {} to {} failed. Error type: {}'.format(file_name, self.get_name(), str(e)))
+                             'Error: put file {} to {} failed. Error type: {}'.format(file_name, self.get_name(),
+                                                                                      str(e)))
             return e.code
         except Exception as e:
             logger.exception('own_adapter',
-                             'Error: put file {} to {} failed. Error type: {}'.format(file_name, self.get_name(), str(e)))
+                             'Error: put file {} to {} failed. Error type: {}'.format(file_name, self.get_name(),
+                                                                                      str(e)))
             return 0
 
     def remove_file(self, file_link):

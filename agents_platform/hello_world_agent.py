@@ -4,29 +4,54 @@ import threading
 import time
 import traceback
 
+import speech_recognition as sr
 import websocket
 
 import logger
+from manager_agent.agent_deduct import get_agents
+from manager_agent.element_factory import generate_elements
+from manager_agent.nlp import get_topics
+from manager_agent.tags_reader import read_tags
 from own_adapter.agent import Agent
 from own_adapter.board import Board
 from own_adapter.element import Element
 from own_adapter.platform_access import PlatformAccess
 
-AGENT_LOGIN = 'lse1983@mail.ru'
-AGENT_PASSWORD = '12345qwert'
+AGENT_LOGIN = 'daulettbot@gmail.com'
+AGENT_PASSWORD = 'G@h0km_K.cz'
 
 
 def __do_something(element):
     """Write your code here"""
 
-    # examples:
-    # put a message to a board
-    message = 'Hello world!'
-    element.get_board().put_message(message)
-
-    # put a URL to an element
-    url = 'https://www.own.space/'
-    element.put_link(url)
+    # get tags and voice option
+    tags, is_voice = read_tags(element)
+    recognized_message = ""
+    # should agent work with voice?
+    if tags and is_voice:
+        try:
+            # switch recognizer on
+            r = sr.Recognizer()
+            with sr.Microphone() as source:
+                logger.info('helloworld', 'ready to listen')
+                # listen till stop
+                audio = r.listen(source)
+                # write message
+                recognized_message = r.recognize_google(audio)
+                logger.info('helloworld', "TEXT:" + recognized_message)
+        except sr.UnknownValueError:
+            logger.error('helloworld', "Google Speech Recognition could not understand audio")
+        except sr.RequestError as e:
+            logger.error('helloworld',
+                         "Could not request results from Google Speech Recognition service; {0}".format(e))
+    # should it work at all?
+    if tags:
+        # do some nlp magic using recognized message and tags
+        topics = get_topics(recognized_message, tags)
+        # get corresponding agents to this topics and tags
+        agents = get_agents(topics, tags)
+        # set them to work or update their tags
+        generate_elements(agents, topics, element.get_board())
 
 
 def __run_on_element(element):
