@@ -12,8 +12,8 @@ from own_adapter.board import Board
 from own_adapter.element import Element
 from own_adapter.platform_access import PlatformAccess
 
-AGENT_LOGIN = ''
-AGENT_PASSWORD = ''
+AGENT_LOGIN = 'lse1983@mail.ru'
+AGENT_PASSWORD = '12345qwert'
 
 
 def __do_something(element):
@@ -47,7 +47,7 @@ def __run_on_board(board):
 
 def periodical_update():
     """Does periodical work with a predefined time interval"""
-    time_interval = 86400
+    time_interval = 5
 
     while True:
         time.sleep(time_interval)

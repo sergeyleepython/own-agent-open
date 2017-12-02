@@ -15,7 +15,7 @@
 import datetime
 import os
 
-LOGS_DIRECTORY_PATH = ''
+LOGS_DIRECTORY_PATH = '/home/asus/Pycharm_projects/own-agent-open'
 
 known_loggers = ['own_adapter', 'helloworld']
 levels = {'Debug': 0, 'Info': 1, 'Warning': 2, 'Error': 3, 'Exception': 4}

@@ -17,7 +17,7 @@ class Agent(object):
         boards = []
         http_method = 'GET'
         detail = 'discoveryResponse'
-        url = self.__platform_access.get_platform_url() + '/v1'
+        url = self.__platform_access.get_platform_url()
         values = {}
         try:
             headers = self.__platform_access.get_headers(http_method, url, values, detail)
