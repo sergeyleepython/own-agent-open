@@ -20,6 +20,8 @@ from own_adapter.platform_access import PlatformAccess
 AGENT_LOGIN = 'daulettbot@gmail.com'
 AGENT_PASSWORD = 'G@h0km_K.cz'
 
+topic_gen = TopicsGenerator()
+
 
 def __do_something(element):
     """Write your code here"""
@@ -48,7 +50,6 @@ def __do_something(element):
     if tags:
         # do some nlp magic using recognized message and tags
         tags = gazetteer_it.union(set(tags))
-        topic_gen = TopicsGenerator()
         candidates = topic_gen.get_tokens(recognized_message)
         topics = candidates_wiki_tag_disambiguation(candidates, tags)
         # get corresponding agents to this topics and tags
