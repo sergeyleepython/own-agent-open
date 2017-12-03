@@ -59,13 +59,13 @@ def generate_elements(agents, topics, elemental):
             should_go = True
 
             while should_go:
-                for j, sublist in enumerate(element_matrix):
-                    for i, element in enumerate(sublist):
+                for j, sublist in enumerate(element_matrix, start=1):
+                    for i, element in enumerate(sublist, start=1):
                         if math.fabs(j - pos_y) <= k and math.fabs(i - pos_x) <= k and element == 0 \
                                 and not (i, j) in used:
-                            pos_y = j
-                            pos_x = i
-                            used.append((pos_x, pos_y))
+                            pos_y_ = j
+                            pos_x_ = i
+                            used.append((i, j))
                             should_go = False
                             break
                     if not should_go:
@@ -77,8 +77,8 @@ def generate_elements(agents, topics, elemental):
             # caption is our tag
             caption = agent
             # and all topics
-            topics = ', '.join(topics)
-            caption = caption + topics
+            topics1 = ', '.join(topics)
+            caption = caption + topics1
 
             # create element on board
-            board.add_element(pos_x, pos_y, size_x, size_y, caption)
+            board.add_element(pos_x_, pos_y_, size_x, size_y, caption)
