@@ -1,3 +1,5 @@
+import math
+
 import logger
 from manager_agent.tags_reader import read_tags_str
 
@@ -5,7 +7,8 @@ TAG_OPEN = "@"
 TAG_CLOSE = ":"
 
 
-def generate_elements(agents, topics, board):
+def generate_elements(agents, topics, elemental):
+    board = elemental.get_board()
     elements = board.get_elements()
     # list all elements on board
     for element in elements:
@@ -44,13 +47,26 @@ def generate_elements(agents, topics, board):
         for agent in agents:
             # get non empty and empty places
             element_matrix = board.get_elements_matrix()
-            # TODO find empty spaces !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             # find empty position
-            pos_x = 1
-            pos_y = 1
-            size_x = 2
-            size_y = 2
+            pos_x = elemental.posX()
+            pos_y = elemental.posY()
+            size_x = 1
+            size_y = 1
+
+            k = 1
+            should_go = True
+
+            while should_go:
+                for i in element_matrix:
+                    for j in element_matrix[i]:
+                        if math.fabs(i - pos_y) <= k and math.fabs(j - pos_x) <= k and element_matrix[i][j] == 0:
+                            pos_y = i
+                            pos_x = j
+                            should_go = False
+                k += 1
+                if k > 100:
+                    logger.error('element_factory', "no free space left")
 
             # caption is our tag
             caption = agent
