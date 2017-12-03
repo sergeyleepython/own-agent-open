@@ -2,8 +2,8 @@
 # need base of all agents with description to deduce
 # what agent we should peak depending on topic
 
-mapping = {"@github: ": ["programming"],
-           "@pics: ": ["hotel"]}
+mapping = {"programming": ["@github: "],
+           "hotel": ["@pics: "]}
 
 def get_agents(domain_tag):
     result = ["@news: "]
