@@ -9,7 +9,7 @@ import requests
 
 stop = stopwords.words('english')
 extra = ['...', '``', "'re", "'m", "'s", "'ve", "''", 'uh', 'na', "n't", 'oh', "'ll", 'us', 'ok', "'cause",
-         'okay', "'d", 'hey', 'fuck', 'right']
+         'okay', "'d", 'hey', 'fuck', 'right', 'well', 'ha']
 full_stop = stop + extra
 
 
@@ -46,33 +46,42 @@ class TopicsGenerator:
         tokens3 = self.no_stopwords(tokens2)
         return tokens3
 
-    def get_tfidf(self, corpus):
-        tf = TfidfVectorizer(analyzer='word', max_df=1, sublinear_tf=1, smooth_idf=False)
-        tfidf_matrix = tf.fit_transform(corpus)
+    def get_tfidf(self, corpus, new_doc):
+        self.corpus.append(new_doc)
+        # full_corpus = self.corpus + [new_doc]
+        tf = TfidfVectorizer(analyzer='word', max_df=1)
+        tfidf_matrix = tf.fit_transform(self.corpus)
         terms = tf.get_feature_names()
-        # sum tfidf frequency of each term through documents
-        sums = tfidf_matrix.sum(axis=0)
-        # connecting term to its sums frequency
-        data = []
-        for col, term in enumerate(terms):
-            data.append((term, sums[0, col]))
+        # sums = tfidf_matrix.sum(axis=0)
+        # data = []
+        # for col, term in enumerate(terms):
+        #     data.append((term, sums[0, col]))
 
-        ranking = pd.DataFrame(data, columns=['term', 'rank'])
-        ranking.sort_values('rank', inplace=True, ascending=False)
-        return ranking['term'].head(10).tolist()
+        ranking = []
+        for col in tfidf_matrix.nonzero()[1]:
+            ranking.append((terms[col], tfidf_matrix[-1, col]))
+        ranking = list(set(ranking))
+        sorted_ranking = sorted(ranking, key=lambda tup: -tup[1])
+        result = [s[0] for s in sorted_ranking[:5]]
+
+        # ranking = pd.DataFrame(data, columns=['term', 'rank'])
+        # ranking.sort_values('rank', inplace=True, ascending=False)
+        # result = ranking['term'].head(5).tolist()
+        return result
 
     def get_tokens(self, content):
         # print('History Set: {}'.format(len(self.history_set)))
         tokens = word_tokenize(content)
         clean_tokens = self.get_clean(tokens)
-        self.corpus.append(' '.join(clean_tokens))
+        # self.corpus.append(' '.join(clean_tokens))
         clean_tokens_set = set(clean_tokens)
         # print('Current Meeting Full Set: {}'.format(len(clean_tokens)))
         clean_tokens_only = clean_tokens_set.difference(self.history_set)
         # print('Current Meeting Unique Set: {}'.format(len(clean_tokens_only)))
         self.stats.append((len(self.history_set), len(clean_tokens_set), len(clean_tokens_only)))
 
-        tfidf_top = self.get_tfidf(self.corpus[-15:])
+        new_doc = ' '.join(clean_tokens)
+        tfidf_top = self.get_tfidf(self.corpus, new_doc)
         tfidf_top = set(tfidf_top)
         # tfidf_top = tfidf_top.difference(self.history_set)
         print('Candidates: {}'.format(tfidf_top))
@@ -85,7 +94,8 @@ if __name__ == '__main__':
     from os import listdir  # delete
 
     gazetteer_it = {'code', 'data', 'file', 'java', 'function', 'user', 'android', 'server', 'system', 'error',
-                    'application', 'html', 'null', 'void', 'online', 'on-line', 'technology', 'internet', 'software'}
+                    'application', 'html', 'null', 'void', 'online', 'on-line', 'technology', 'internet', 'software',
+                    'hardware', 'agile', 'scrum', 'programming'}
 
     data_path = '/home/asus/innopolis/NLP/Final_Project/silicon-valley/data'  # delete
     filenames = listdir(data_path)  # delete
@@ -127,5 +137,5 @@ if __name__ == '__main__':
                         print('{:15} : POSITIVE'.format(candidate))
                     else:
                         print('{:15} : NEGATIVE'.format(candidate))
-        if num > 5: break
+        # if num > 5: break
         print()
