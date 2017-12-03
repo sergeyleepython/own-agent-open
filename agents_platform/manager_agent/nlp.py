@@ -1,7 +1,12 @@
+import nltk
+
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+
 from string import punctuation
 from sklearn.feature_extraction.text import TfidfVectorizer
 # import pandas as pd
-import nltk
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 from bs4 import BeautifulSoup
@@ -138,6 +143,6 @@ if __name__ == '__main__':
         with open(path, 'r') as f:
             content = f.read()
         candidates = topic_gen.get_tokens(content)
-        topics = candidates_wiki_tag_disambiguation(candidates)
+        topics = candidates_wiki_tag_disambiguation(candidates, gazetteer_it)
         if num > 5: break
         print()

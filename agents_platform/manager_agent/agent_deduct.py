@@ -7,14 +7,15 @@ HOTEL_TAG = "hotel"
 
 
 def get_agents(topics, tags):
+    result = ["@news: "]
     agents = ["@news: ", "@github: ", "@pics: "]
-    programming_agents = ["@news: ", "@github: "]
-    hotel_agents = ["@news: ", "@pics: "]
+    programming_agents = ["@github: "]
+    hotel_agents = ["@pics: "]
 
     # TODO some interaction with agents base here
 
-    if tags == PROGRAMMING_TAG:
-        return programming_agents
-    elif tags == HOTEL_TAG:
-        return hotel_agents
-    return agents
+    if PROGRAMMING_TAG in tags:
+        result = result.extend(programming_agents)
+    if HOTEL_TAG in tags:
+        result = result.extend(hotel_agents)
+    return list(set(result))

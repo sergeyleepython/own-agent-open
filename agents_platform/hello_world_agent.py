@@ -30,28 +30,28 @@ def __do_something(element):
     tags, is_voice = read_tags(element)
     recognized_message = ""
     # should agent work with voice?
-    if tags and is_voice:
-        try:
-            # switch recognizer on
-            r = sr.Recognizer()
-            with sr.Microphone() as source:
-                logger.info('helloworld', 'ready to listen')
-                # listen till stop
-                audio = r.listen(source)
-                # write message
-                recognized_message = r.recognize_google(audio)
-                logger.info('helloworld', "TEXT:" + recognized_message)
-        except sr.UnknownValueError:
-            logger.error('helloworld', "Google Speech Recognition could not understand audio")
-        except sr.RequestError as e:
-            logger.error('helloworld',
-                         "Could not request results from Google Speech Recognition service; {0}".format(e))
-    # should it work at all?
     if tags:
-        # do some nlp magic using recognized message and tags
-        tags = gazetteer_it.union(set(tags))
-        candidates = topic_gen.get_tokens(recognized_message)
-        topics = candidates_wiki_tag_disambiguation(candidates, tags)
+        topics = tags
+        if is_voice:
+            try:
+                # switch recognizer on
+                r = sr.Recognizer()
+                with sr.Microphone() as source:
+                    logger.info('helloworld', 'ready to listen')
+                    # listen till stop
+                    audio = r.listen(source)
+                    # write message
+                    recognized_message = r.recognize_google(audio)
+                    # nlp
+                    tags = gazetteer_it.union(set(tags))
+                    candidates = topic_gen.get_tokens(recognized_message)
+                    topics = candidates_wiki_tag_disambiguation(candidates, tags)
+                    logger.info('helloworld', "TEXT:" + recognized_message)
+            except sr.UnknownValueError:
+                logger.error('helloworld', "Google Speech Recognition could not understand audio")
+            except sr.RequestError as e:
+                logger.error('helloworld',
+                             "Could not request results from Google Speech Recognition service; {0}".format(e))
         # get corresponding agents to this topics and tags
         agents = get_agents(topics, tags)
         # set them to work or update their tags

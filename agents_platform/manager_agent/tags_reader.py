@@ -17,7 +17,7 @@ def read_tags_str(tag, element):
         logger.exception('tags_reader', 'topics exception')
 
     topics = data[s:e]
-    topics_list = map(str.strip, topics.split(","))
+    topics_list = [topic.strip() for topic in topics.split(',') if topic.strip()]
 
     return topics_list
 
