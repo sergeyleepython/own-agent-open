@@ -7,6 +7,10 @@ from nltk.corpus import stopwords
 from bs4 import BeautifulSoup
 import requests
 
+gazetteer_it = {'code', 'data', 'file', 'java', 'function', 'user', 'android', 'server', 'system', 'error',
+                'application', 'html', 'null', 'void', 'online', 'on-line', 'technology', 'internet', 'software',
+                'hardware', 'agile', 'scrum', 'programming'}
+
 stop = stopwords.words('english')
 extra = ['...', '``', "'re", "'m", "'s", "'ve", "''", 'uh', 'na', "n't", 'oh', "'ll", 'us', 'ok', "'cause",
          'okay', "'d", 'hey', 'fuck', 'right', 'well', 'ha']
@@ -14,7 +18,10 @@ full_stop = stop + extra
 
 
 def get_topics(recognized_message, tags):
-    topics = ["topic1", "topic2"]
+    tags = gazetteer_it.union(set(tags))
+    topic_gen = TopicsGenerator()
+    candidates = topic_gen.get_tokens(content)
+    topics = candidates_wiki_tag_disambiguation(candidates)
     return topics
 
 
@@ -89,13 +96,43 @@ class TopicsGenerator:
         return tfidf_top
 
 
+def candidates_wiki_tag_disambiguation(candidates):
+    wiki_base_url = 'https://en.wikipedia.org/wiki/'
+    topics = []
+    for candidate in candidates:
+        candidate_url = wiki_base_url + candidate
+        result = requests.get(candidate_url)
+        if result.status_code == 200:
+            c = result.content
+            soup = BeautifulSoup(c, "html.parser")
+            div = soup.find('div', {'id': 'mw-content-text'})
+            p = div.find('p', recursive=True)
+            if p and "may refer to:" not in p.text:
+                tokens = word_tokenize(p.text)
+                tokens = set(topic_gen.get_clean(tokens))
+                if tokens.intersection(gazetteer_it):
+                    print('{:15} : POSITIVE'.format(candidate))
+                    topics.append(candidate)
+                else:
+                    print('{:15} : NEGATIVE'.format(candidate))
+            else:
+                all = []
+                ul = div.find_all('ul', recursive=True)
+                if ul:
+                    for li in ul:
+                        tokens = word_tokenize(li.text)
+                        tokens = topic_gen.get_clean(tokens)
+                        all.extend(tokens)
+                if set(all).intersection(gazetteer_it):
+                    print('{:15} : POSITIVE'.format(candidate))
+                    topics.append(candidate)
+                else:
+                    print('{:15} : NEGATIVE'.format(candidate))
+    return topics
+
 if __name__ == '__main__':
     import os
     from os import listdir  # delete
-
-    gazetteer_it = {'code', 'data', 'file', 'java', 'function', 'user', 'android', 'server', 'system', 'error',
-                    'application', 'html', 'null', 'void', 'online', 'on-line', 'technology', 'internet', 'software',
-                    'hardware', 'agile', 'scrum', 'programming'}
 
     data_path = '/home/asus/innopolis/NLP/Final_Project/silicon-valley/data'  # delete
     filenames = listdir(data_path)  # delete
@@ -108,34 +145,6 @@ if __name__ == '__main__':
         with open(path, 'r') as f:
             content = f.read()
         candidates = topic_gen.get_tokens(content)
-
-        wiki_base_url = 'https://en.wikipedia.org/wiki/'
-        for candidate in candidates:
-            candidate_url = wiki_base_url + candidate
-            result = requests.get(candidate_url)
-            if result.status_code == 200:
-                c = result.content
-                soup = BeautifulSoup(c, "html.parser")
-                div = soup.find('div', {'id': 'mw-content-text'})
-                p = div.find('p', recursive=True)
-                if p and "may refer to:" not in p.text:
-                    tokens = word_tokenize(p.text)
-                    tokens = set(topic_gen.get_clean(tokens))
-                    if tokens.intersection(gazetteer_it):
-                        print('{:15} : POSITIVE'.format(candidate))
-                    else:
-                        print('{:15} : NEGATIVE'.format(candidate))
-                else:
-                    all = []
-                    ul = div.find_all('ul', recursive=True)
-                    if ul:
-                        for li in ul:
-                            tokens = word_tokenize(li.text)
-                            tokens = topic_gen.get_clean(tokens)
-                            all.extend(tokens)
-                    if set(all).intersection(gazetteer_it):
-                        print('{:15} : POSITIVE'.format(candidate))
-                    else:
-                        print('{:15} : NEGATIVE'.format(candidate))
-        # if num > 5: break
+        topics = candidates_wiki_tag_disambiguation(candidates)
+        if num > 5: break
         print()
