@@ -10,7 +10,7 @@ import websocket
 import logger
 from manager_agent.agent_deduct import get_agents
 from manager_agent.element_factory import generate_elements
-from manager_agent.nlp import get_topics
+from manager_agent.nlp import TopicsGenerator, gazetteer_it, candidates_wiki_tag_disambiguation
 from manager_agent.tags_reader import read_tags
 from own_adapter.agent import Agent
 from own_adapter.board import Board
@@ -47,7 +47,10 @@ def __do_something(element):
     # should it work at all?
     if tags:
         # do some nlp magic using recognized message and tags
-        topics = get_topics(recognized_message, tags)
+        tags = gazetteer_it.union(set(tags))
+        topic_gen = TopicsGenerator()
+        candidates = topic_gen.get_tokens(recognized_message)
+        topics = candidates_wiki_tag_disambiguation(candidates, tags)
         # get corresponding agents to this topics and tags
         agents = get_agents(topics, tags)
         # set them to work or update their tags

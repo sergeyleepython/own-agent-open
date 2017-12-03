@@ -1,6 +1,6 @@
 from string import punctuation
 from sklearn.feature_extraction.text import TfidfVectorizer
-import pandas as pd
+# import pandas as pd
 import nltk
 from nltk import word_tokenize
 from nltk.corpus import stopwords
@@ -15,14 +15,6 @@ stop = stopwords.words('english')
 extra = ['...', '``', "'re", "'m", "'s", "'ve", "''", 'uh', 'na', "n't", 'oh', "'ll", 'us', 'ok', "'cause",
          'okay', "'d", 'hey', 'fuck', 'right', 'well', 'ha']
 full_stop = stop + extra
-
-
-def get_topics(recognized_message, tags):
-    tags = gazetteer_it.union(set(tags))
-    topic_gen = TopicsGenerator()
-    candidates = topic_gen.get_tokens(content)
-    topics = candidates_wiki_tag_disambiguation(candidates)
-    return topics
 
 
 class TopicsGenerator:
@@ -96,7 +88,7 @@ class TopicsGenerator:
         return tfidf_top
 
 
-def candidates_wiki_tag_disambiguation(candidates):
+def candidates_wiki_tag_disambiguation(candidates, gazetteer):
     wiki_base_url = 'https://en.wikipedia.org/wiki/'
     topics = []
     for candidate in candidates:
@@ -123,12 +115,13 @@ def candidates_wiki_tag_disambiguation(candidates):
                         tokens = word_tokenize(li.text)
                         tokens = topic_gen.get_clean(tokens)
                         all.extend(tokens)
-                if set(all).intersection(gazetteer_it):
+                if set(all).intersection(gazetteer):
                     print('{:15} : POSITIVE'.format(candidate))
                     topics.append(candidate)
                 else:
                     print('{:15} : NEGATIVE'.format(candidate))
     return topics
+
 
 if __name__ == '__main__':
     import os
