@@ -13,19 +13,19 @@ def generate_elements(agents, topics, elemental):
     # list all elements on board
     for element in elements:
         data = element.get_name()
-        tag = ""
+        agent = ""
         try:
             # get tag of current element
-            tag = data[data.index(TAG_OPEN):data.index(TAG_CLOSE)] + ": "
+            agent = data[data.index(TAG_OPEN):data.index(TAG_CLOSE)] + ": "
         except ValueError as ex:
             logger.exception('element_factory', 'topics exception')
 
         # if such tag is in our list
-        if tag in agents:
+        if agent in agents:
             # remove it from our list
-            agents.remove(tag)
+            agents.remove(agent)
             # this tag already have some topics
-            existing_topics = read_tags_str(tag, element)
+            existing_topics = read_tags_str(agent, element)
             # difference between ours
             diff = set(topics).difference(existing_topics)
             # union with ours
@@ -33,7 +33,7 @@ def generate_elements(agents, topics, elemental):
             # if there is difference
             if diff:
                 # caption is our tag
-                caption = tag
+                caption = agent
                 # and all topics
                 for i in union:
                     caption += i + ", "
@@ -77,9 +77,8 @@ def generate_elements(agents, topics, elemental):
             # caption is our tag
             caption = agent
             # and all topics
-            for i in topics:
-                caption += i + ", "
-            caption = caption[:len(caption) - 2]
+            topics = ', '.join(topics)
+            caption = caption + topics
 
             # create element on board
             board.add_element(pos_x, pos_y, size_x, size_y, caption)
