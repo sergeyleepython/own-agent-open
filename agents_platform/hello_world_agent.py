@@ -10,7 +10,7 @@ import websocket
 import logger
 from manager_agent.agent_deduct import get_agents
 from manager_agent.element_factory import generate_elements
-from manager_agent.nlp import TopicsGenerator, gazetteer_it, candidates_wiki_tag_disambiguation
+from manager_agent.nlp import TopicsGenerator
 from manager_agent.tags_reader import read_tags
 from own_adapter.agent import Agent
 from own_adapter.board import Board
@@ -20,42 +20,45 @@ from own_adapter.platform_access import PlatformAccess
 AGENT_LOGIN = 'daulettbot@gmail.com'
 AGENT_PASSWORD = 'G@h0km_K.cz'
 
-topic_gen = TopicsGenerator()
+TOPIC_GENS = {}
 
 
 def __do_something(element):
     """Write your code here"""
 
     # get tags and voice option
-    tags, is_voice = read_tags(element)
+    domain_tags, is_voice = read_tags(element)
     recognized_message = ""
     # should agent work with voice?
-    if tags:
-        topics = tags
-        if is_voice:
-            try:
-                # switch recognizer on
-                r = sr.Recognizer()
-                with sr.Microphone() as source:
-                    logger.info('helloworld', 'ready to listen')
-                    # listen till stop
-                    audio = r.listen(source, phrase_time_limit=10, timeout=2)
-                    # write message
-                    recognized_message = r.recognize_google(audio)
-                    # nlp
-                    gazetteer = gazetteer_it.union(set(tags))
-                    candidates = topic_gen.get_tokens(recognized_message)
-                    topics = candidates_wiki_tag_disambiguation(candidates, gazetteer)
-                    logger.info('helloworld', "TEXT:" + recognized_message)
-            except sr.UnknownValueError:
-                logger.error('helloworld', "Google Speech Recognition could not understand audio")
-            except sr.RequestError as e:
-                logger.error('helloworld',
-                             "Could not request results from Google Speech Recognition service; {0}".format(e))
-        # get corresponding agents to this topics and tags
-        agents = get_agents(topics, tags)
-        # set them to work or update their tags
-        generate_elements(agents, topics, element)
+    if domain_tags:
+        for domain_tag in domain_tags:
+            topics = domain_tags
+            if is_voice:
+                try:
+                    # switch recognizer on
+                    r = sr.Recognizer()
+                    with sr.Microphone() as source:
+                        logger.info('helloworld', 'ready to listen')
+                        # listen till stop
+                        audio = r.listen(source, phrase_time_limit=10, timeout=2)
+                        # write message
+                        recognized_message = r.recognize_google(audio)
+                        # nlp
+                        topic_gen = TOPIC_GENS.get(domain_tag)
+                        if topic_gen is None:
+                            topic_gen = TopicsGenerator(domain_tag=domain_tag)
+                            TOPIC_GENS[domain_tag] = topic_gen
+                        topics = topic_gen.candidates_wiki_tag_disambiguation(recognized_message)
+                        logger.info('helloworld', "TEXT:" + recognized_message)
+                except sr.UnknownValueError:
+                    logger.error('helloworld', "Google Speech Recognition could not understand audio")
+                except sr.RequestError as e:
+                    logger.error('helloworld',
+                                 "Could not request results from Google Speech Recognition service; {0}".format(e))
+            # get corresponding agents to this topics and tags
+            agents = get_agents(domain_tag)
+            # set them to work or update their tags
+            generate_elements(agents, topics, element)
 
 
 def __run_on_element(element):
