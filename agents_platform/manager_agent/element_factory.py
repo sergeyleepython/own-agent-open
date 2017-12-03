@@ -27,9 +27,9 @@ def generate_elements(agents, topics, elemental):
             # this tag already have some topics
             existing_topics = read_tags_str(tag, element)
             # difference between ours
-            diff = existing_topics - topics
+            diff = set(topics).difference(existing_topics)
             # union with ours
-            union = existing_topics | topics
+            union = set(existing_topics).union(topics)
             # if there is difference
             if diff:
                 # caption is our tag
@@ -44,13 +44,14 @@ def generate_elements(agents, topics, elemental):
                                      element.get_sizeY(), caption)
     # if some agents still not added
     if agents:
+        used = []
         for agent in agents:
             # get non empty and empty places
             element_matrix = board.get_elements_matrix()
 
             # find empty position
-            pos_x = elemental.posX()
-            pos_y = elemental.posY()
+            pos_x = elemental.get_posX()
+            pos_y = elemental.get_posY()
             size_x = 1
             size_y = 1
 
@@ -58,14 +59,19 @@ def generate_elements(agents, topics, elemental):
             should_go = True
 
             while should_go:
-                for i in element_matrix:
-                    for j in element_matrix[i]:
-                        if math.fabs(i - pos_y) <= k and math.fabs(j - pos_x) <= k and element_matrix[i][j] == 0:
-                            pos_y = i
-                            pos_x = j
+                for j, sublist in enumerate(element_matrix):
+                    for i, element in enumerate(sublist):
+                        if math.fabs(j - pos_y) <= k and math.fabs(i - pos_x) <= k and element == 0 \
+                                and not (i, j) in used:
+                            pos_y = j
+                            pos_x = i
+                            used.append((pos_x, pos_y))
                             should_go = False
+                            break
+                    if not should_go:
+                        break
                 k += 1
-                if k > 100:
+                if k > 10:
                     logger.error('element_factory', "no free space left")
 
             # caption is our tag

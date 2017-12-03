@@ -39,7 +39,7 @@ def __do_something(element):
                 with sr.Microphone() as source:
                     logger.info('helloworld', 'ready to listen')
                     # listen till stop
-                    audio = r.listen(source)
+                    audio = r.listen(source, phrase_time_limit=10, timeout=2)
                     # write message
                     recognized_message = r.recognize_google(audio)
                     # nlp
@@ -55,7 +55,7 @@ def __do_something(element):
         # get corresponding agents to this topics and tags
         agents = get_agents(topics, tags)
         # set them to work or update their tags
-        generate_elements(agents, topics, element.get_board())
+        generate_elements(agents, topics, element)
 
 
 def __run_on_element(element):
