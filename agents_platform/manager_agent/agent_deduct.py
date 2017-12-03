@@ -15,7 +15,7 @@ def get_agents(topics, tags):
     # TODO some interaction with agents base here
 
     if PROGRAMMING_TAG in tags:
-        result = result.extend(programming_agents)
+        result.extend(programming_agents)
     if HOTEL_TAG in tags:
-        result = result.extend(hotel_agents)
+        result.extend(hotel_agents)
     return list(set(result))

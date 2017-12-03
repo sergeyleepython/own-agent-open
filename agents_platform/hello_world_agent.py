@@ -43,9 +43,9 @@ def __do_something(element):
                     # write message
                     recognized_message = r.recognize_google(audio)
                     # nlp
-                    tags = gazetteer_it.union(set(tags))
+                    gazetteer = gazetteer_it.union(set(tags))
                     candidates = topic_gen.get_tokens(recognized_message)
-                    topics = candidates_wiki_tag_disambiguation(candidates, tags)
+                    topics = candidates_wiki_tag_disambiguation(candidates, gazetteer)
                     logger.info('helloworld', "TEXT:" + recognized_message)
             except sr.UnknownValueError:
                 logger.error('helloworld', "Google Speech Recognition could not understand audio")

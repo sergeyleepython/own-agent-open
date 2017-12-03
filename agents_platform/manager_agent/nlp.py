@@ -92,7 +92,7 @@ class TopicsGenerator:
         self.history_set = self.history_set.union(clean_tokens_set)
         return tfidf_top
 
-
+topic_gen_ = TopicsGenerator()
 def candidates_wiki_tag_disambiguation(candidates, gazetteer):
     wiki_base_url = 'https://en.wikipedia.org/wiki/'
     topics = []
@@ -106,7 +106,7 @@ def candidates_wiki_tag_disambiguation(candidates, gazetteer):
             p = div.find('p', recursive=True)
             if p and "may refer to:" not in p.text:
                 tokens = word_tokenize(p.text)
-                tokens = set(topic_gen.get_clean(tokens))
+                tokens = set(topic_gen_.get_clean(tokens))
                 if tokens.intersection(gazetteer_it):
                     print('{:15} : POSITIVE'.format(candidate))
                     topics.append(candidate)
@@ -118,7 +118,7 @@ def candidates_wiki_tag_disambiguation(candidates, gazetteer):
                 if ul:
                     for li in ul:
                         tokens = word_tokenize(li.text)
-                        tokens = topic_gen.get_clean(tokens)
+                        tokens = topic_gen_.get_clean(tokens)
                         all.extend(tokens)
                 if set(all).intersection(gazetteer):
                     print('{:15} : POSITIVE'.format(candidate))
